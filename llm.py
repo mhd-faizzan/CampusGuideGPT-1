@@ -16,7 +16,7 @@ def query_groq_llm(user_input):
     }
 
     data = {
-        "model": "gemma2-9b-it",  # ✅ Make sure this model exists in your Groq account
+        "model": "llama3-70b-8192",  # ✅ Updated model
         "messages": [
             {"role": "system", "content": "You are an AI assistant providing university-related information."},
             {"role": "user", "content": user_input}
