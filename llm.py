@@ -1,29 +1,27 @@
 import requests
 import streamlit as st
-from backend import get_university_info
 
-# Load API key from Streamlit secrets
-GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
-GROQ_MODEL = "gemma-2b-it"
-
-def query_groq_llm(query):
-    retrieved_info = get_university_info(query)
+def query_groq_llm(user_input):
+    """Query the Groq LLM and return the AI response."""
+    api_key = st.secrets["GROQ_API_KEY"]  # Load API key from Streamlit secrets
+    url = "https://api.groq.com/openai/v1/completions"
     
-    structured_data = "\n".join([f"{col}: {retrieved_info[col]}" for col in retrieved_info.index])
-
-    prompt = f"Here is relevant information from Hochschule Harz database:\n{structured_data}\nNow answer this query: {query}"
-
-    url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {
-        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
+    
     data = {
-        "model": GROQ_MODEL,
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.5,
-        "max_tokens": 300
+        "model": "gemma2-9b-it",
+        "prompt": user_input,
+        "max_tokens": 100
     }
 
-    response = requests.post(url, json=data, headers=headers)
-    return response.json().get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()  # Handle HTTP errors
+        
+        return response.json().get('choices', [{}])[0].get('text', 'No response from AI.').strip()
+
+    except requests.exceptions.RequestException as e:
+        return f"Error: {e}"
