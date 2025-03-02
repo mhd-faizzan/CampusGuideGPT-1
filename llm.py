@@ -11,17 +11,25 @@ def query_groq_llm(user_input):
         "Content-Type": "application/json"
     }
     
+    # Improving the prompt for better AI responses
+    prompt = f"You are an AI assistant helping students find university programs. Provide additional insights about this query:\n\n{user_input}"
+
     data = {
         "model": "gemma2-9b-it",
-        "prompt": user_input,
-        "max_tokens": 100
+        "prompt": prompt,
+        "max_tokens": 200,
+        "temperature": 0.7  # Making the response more creative
     }
 
     try:
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()  # Handle HTTP errors
+
+        # Print the response for debugging
+        response_json = response.json()
+        print("Groq API Response:", response_json)  # Debugging output
         
-        return response.json().get('choices', [{}])[0].get('text', 'No response from AI.').strip()
+        return response_json.get('choices', [{}])[0].get('text', 'No response from AI.').strip()
 
     except requests.exceptions.RequestException as e:
         return f"Error: {e}"
